@@ -1,0 +1,3 @@
+https://docs.circuitpython.org/projects/bmp3xx/en/1.3.7/examples.html
+https://docs.circuitpython.org/projects/lis3mdl/en/latest/examples.html
+https://docs.circuitpython.org/projects/lsm6dsox/en/latest/
