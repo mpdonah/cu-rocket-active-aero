@@ -1,4 +1,7 @@
-import activeaero
+from activeaero import ActiveAero
 
-activeaero.setup()
-activeaero.main()
+def main():
+    active_aero = ActiveAero()
+    active_aero.main()
+
+main()
