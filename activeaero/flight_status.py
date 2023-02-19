@@ -56,12 +56,14 @@ class FlightStatus:
     
     def check_liftoff(self) -> bool:
         """Determines if the rocket has liftoff.
+        Checks if the rocket has gained more than 1 meter of altitude in the last second OR
+        The rocket has gained a total of 10 meters since the starting altitude
         Returns:
             bool: True if the rocket has liftoff, False otherwise.
         """
-        lm = np.median(self.altitude_list[64-8:])  # Newest 8 samples (.5 seconds)
-        fm = np.median(self.altitude_list[:64-8])  # Oldest 56 samples (3.5 seconds)
-        return lm > fm + 10
+        lm = np.median(np.array(self.altitude_list[64-8:]))  # Newest 8 samples (1 seconds)
+        fm = np.median(np.array(self.altitude_list[:64-8]))  # Oldest 56 samples (7 seconds)
+        return lm > fm + 1 or lm > 10
     
     
     # IMPORTANT: SHOULD WE USE LESS OLDER SAMPLES TO DETECT APOGEE SOONER???
@@ -74,8 +76,8 @@ class FlightStatus:
         Returns:
             bool: True if the rocket has passed the apogee, False otherwise.
         """
-        lm = np.median(self.altitude_list[64-8:])  # Newest 8 samples (.5 seconds)
-        fm = np.median(self.altitude_list[64-16:64-8])  # Second newest 8 samples .5 to 1 second ago)
+        lm = np.median(np.array(self.altitude_list[64-8:]))  # Newest 8 samples (1 seconds)
+        fm = np.median(np.array(self.altitude_list[64-16:64-8]))  # Second newest 8 samples 1 to 2 second ago)
         return lm < fm
     
     def check_landed(self) -> bool:
@@ -83,7 +85,7 @@ class FlightStatus:
         Returns:
             bool: True if the rocket has landed, False otherwise.
         """
-        lm = np.median(self.altitude_list[64-8:])  # Newest 8 samples (.5 seconds)
+        lm = np.median(np.array(self.altitude_list[64-8:]))  # Newest 8 samples (.5 seconds)
         return lm < 10  # Altitude is already relative to base altitude. Checking if we are below 10 meters above base altitude
 
     def new_telemetry(self, telemetry: dict) -> None:
