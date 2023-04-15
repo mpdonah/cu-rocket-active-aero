@@ -23,6 +23,14 @@ bool FlightStatus::checkApogee() {
     return lmMed < fmMed;
 }
 
+bool FlightStatus::checkGround() {
+    std::vector<double> lm(altitudeDeque.cend() - 16, altitudeDeque.cend());
+
+    double lmMed = median(lm);
+
+    return lmMed < 20;
+}
+
 void FlightStatus::newTelemetry(double acceleration, double altitude) {
     altitudeDeque.pop_front();
     altitudeDeque.push_back(altitude);
@@ -37,7 +45,16 @@ void FlightStatus::newTelemetry(double acceleration, double altitude) {
     {
         flightStage = APOGEE;
     }
-    
+    if(flightStage == APOGEE) {
+        flightStage = DESCENT;
+    }
+    if(checkGround() && flightStage == DESCENT) {
+        flightStage = ONGROUND;
+    }
+}
+
+Stage FlightStatus::getStage() {
+    return flightStage;
 }
 
 

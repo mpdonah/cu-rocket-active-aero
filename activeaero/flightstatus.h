@@ -21,8 +21,9 @@ class FlightStatus {
 
     double median(std::vector<double> vec);
     bool checkApogee();
+    bool checkGround();
   public:
-    FlightStatus(double baseAltitude);
+    FlightStatus();
     void newTelemetry(double acceleration, double altitude);
     Stage getStage();
 };
