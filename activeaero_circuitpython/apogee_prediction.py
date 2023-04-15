@@ -49,7 +49,6 @@ class ApogeePrediction():
         
         return appredone, appredtwo
 
-
     # STILL NEEDED:
     # Sensors need to be all added in
     # Data needs to be recorded to some file, all sensor data, curalt, self.curvelacc, curvelpres, appredone, appredtwo
