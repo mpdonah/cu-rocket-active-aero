@@ -1,11 +1,20 @@
 #include "telemetry.h"
 
-Telemetry::Telemetry(): acceleration(64, 0) {
-    while (!bno08x.begin_UART()) {}
+Telemetry::Telemetry(): acceleration(64, 0) {}
+
+void Telemetry::setupTelem() {
+    Serial.println("Initializing BNO and BMP");
+    while (!bmp.begin_I2C()) {}
+    Serial.println("BMP initialized");
+    while (!bno08x.begin_I2C(0x4A)) {}
+    Serial.println("BNO initialized");
+    Serial.println("BNO and BMP initialized");
+
+    setReports();
 }
 
-void setReports() {
-    // bno08x.enableReport(SH2_ACCELEROMETER);
+void Telemetry::setReports() {
+    bno08x.enableReport(SH2_ACCELEROMETER);
     bno08x.enableReport(SH2_GYROSCOPE_CALIBRATED);
     bno08x.enableReport(SH2_MAGNETIC_FIELD_CALIBRATED);
     bno08x.enableReport(SH2_ROTATION_VECTOR);
@@ -26,8 +35,10 @@ void Telemetry::pollBNO() {
     case SH2_GYROSCOPE_CALIBRATED:
         lGyroscope = sensorValue;
         break;
-}
-
+    case SH2_ACCELEROMETER:
+        lAcceleration = sensorValue;
+        break;
+  }
 }
 
 std::map<std::string,std::vector<double>> Telemetry::getTelemetry() {
@@ -40,6 +51,9 @@ std::map<std::string,std::vector<double>> Telemetry::getTelemetry() {
     std::vector<double> temperature;
     std::vector<double> altitude;
     
+    acceleration.push_back(lAcceleration.un.accelerometer.x);
+    acceleration.push_back(lAcceleration.un.accelerometer.y);
+    acceleration.push_back(lAcceleration.un.accelerometer.z);
     
     gyroscope.push_back(lGyroscope.un.gyroscope.x);
     gyroscope.push_back(lGyroscope.un.gyroscope.y);
@@ -54,11 +68,13 @@ std::map<std::string,std::vector<double>> Telemetry::getTelemetry() {
     orientation.push_back(lOrientation.un.rotationVector.k);
     orientation.push_back(lOrientation.un.rotationVector.real);
     
-    pressure.push_back(sensorValue.pressure);
-    temperature.push_back(sensorValue.temperature);
-    altitude.push_back(sensorValue.altitude);
+    pressure.push_back(bmp.readPressure());
+    altitude.push_back(bmp.readAltitude(1013.25));
+    temperature.push_back(bmp.readTemperature());
 
     telemetry["acceleration"] = acceleration;
+    telemetry["gyroscope"] = gyroscope;
+    telemetry["magnetometer"] = magnetometer;
     telemetry["orientation"] = orientation;
     telemetry["pressure"] = pressure;
     telemetry["temperature"] = temperature;

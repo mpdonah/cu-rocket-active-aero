@@ -4,6 +4,8 @@
 #include "math.h"
 
 ApogeePrediction::ApogeePrediction(double rocketMass, double dragCoefficent, double crossArea, double targetApogee) : rocketMass(rocketMass), dragCoefficent(dragCoefficent), crossArea(crossArea), targetApogee(targetApogee) {
+    currentVelocity = 0;
+    lastRecTime = 0;
     predApogee = 0;
 }
 
@@ -40,10 +42,11 @@ double ApogeePrediction::predictApogee(double* acceleration, double* orientation
     double euler[3] = {0, 0, 0};
     eulerFromQuaternion(euler, orientation[0], orientation[1], orientation[2], orientation[3]);  // Convert to radians
     double azvect = -acceleration[0] * sin(euler[1]) + acceleration[1]*cos(euler[1])*sin(euler[0]) + acceleration[2] * cos(euler[1])*cos(euler[0]); // vertical acceleration component, from the bno08x
+    calcVelocity(azvect);
     
     double rho = pressure*100/(287.058*(temperature+273.15)); // Get dry air density
     double k = 0.5*rho*dragCoefficent*crossArea;
-    double appred = ((rocketMass/(2*k))*log((rocketMass*9.81 + k*pow(currentVelocity,2))/(rocketMass*9.81))+altitude); // Apogee prediction in meters
+    double predApogee = ((rocketMass/(2*k))*log((rocketMass*9.81 + k*pow(currentVelocity,2))/(rocketMass*9.81))+altitude); // Apogee prediction in meters
 
-    return appred;
+    return predApogee;
 }
