@@ -32,7 +32,7 @@ void ApogeePrediction::eulerFromQuaternion(double *euler, double x, double y, do
 }
 
 void ApogeePrediction::calcVelocity(double acceleration) {
-    double curTime = micros();
+    double curTime = micros()/1000000;
     double deltaTime = curTime - lastRecTime;
     currentVelocity += acceleration * deltaTime;
     lastRecTime = curTime;
